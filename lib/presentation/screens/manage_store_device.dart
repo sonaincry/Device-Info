@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:device_info_application/presentation/screens/display_device.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info_application/models/store_device.dart';
 import 'package:device_info_application/repository/store_device_repository.dart';
@@ -119,6 +120,25 @@ class _StoreDeviceListScreenState extends State<StoreDeviceListScreen> {
                         icon: const Icon(Icons.delete),
                         onPressed: () =>
                             _deleteStoreDevice(storeDevice.storeDeviceId),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DisplayDevice(
+                                  deviceId: storeDevice.storeDeviceId),
+                            ),
+                          );
+                        },
+                        child: const Text('Display',
+                            style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   ),

@@ -1,3 +1,4 @@
+import 'package:device_info_application/presentation/screens/device_info.dart';
 import 'package:device_info_application/presentation/screens/manage_store_device.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -30,13 +31,9 @@ class DashboardScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-
-              // Section 2: Charts or Graphs
-              _buildChartCard("Sales Trend"), // Example chart
+              _buildChartCard("Sales Trend"),
 
               const SizedBox(height: 20),
-
-              // Section 3: Recent Activity
               const Text(
                 "Recent Activity",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -67,6 +64,23 @@ class DashboardScreen extends StatelessWidget {
                       );
                     },
                     child: const Text('Manage Store Device'),
+                  ),
+                ],
+              ),
+              Wrap(
+                spacing: 10.0,
+                runSpacing: 10.0,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DeviceInfoScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Device Info'),
                   ),
                 ],
               ),

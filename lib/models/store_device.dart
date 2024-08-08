@@ -2,6 +2,7 @@ class StoreDevice {
   final int storeDeviceId;
   final int storeId;
   final String storeDeviceName;
+  final String deviceCode;
   final int deviceWidth;
   final int deviceHeight;
   final dynamic displays;
@@ -11,6 +12,7 @@ class StoreDevice {
     required this.storeDeviceId,
     required this.storeId,
     required this.storeDeviceName,
+    required this.deviceCode,
     required this.deviceWidth,
     required this.deviceHeight,
     this.displays,
@@ -22,6 +24,7 @@ class StoreDevice {
       storeDeviceId: json['storeDeviceId'],
       storeId: json['storeId'],
       storeDeviceName: json['storeDeviceName'],
+      deviceCode: json['deviceCode'],
       deviceWidth: json['deviceWidth'],
       deviceHeight: json['deviceHeight'],
       displays: json['displays'],
@@ -34,6 +37,7 @@ class StoreDevice {
       'storeDeviceId': storeDeviceId,
       'storeId': storeId,
       'storeDeviceName': storeDeviceName,
+      'deviceCode': deviceCode,
       'deviceWidth': deviceWidth,
       'deviceHeight': deviceHeight,
       'displays': displays,

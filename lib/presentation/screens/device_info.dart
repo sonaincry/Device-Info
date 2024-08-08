@@ -1,3 +1,4 @@
+import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ class DeviceInfoScreen extends StatefulWidget {
 
 class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
   String deviceName = 'Unknown';
+  String androidId = 'Unknown';
   double screenWidth = 0;
   double screenHeight = 0;
   double devicePixelRatio = 1;
@@ -16,36 +18,46 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => getDeviceInfo());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getDeviceInfo();
+    });
   }
 
   Future<void> getDeviceInfo() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    var deviceData;
+    final AndroidId _androidIdPlugin = AndroidId();
 
     try {
-      if (Theme.of(context).platform == TargetPlatform.android) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        setState(() {
-          deviceName = androidInfo.model ?? 'Unknown';
-        });
-      } else if (Theme.of(context).platform == TargetPlatform.iOS) {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        setState(() {
-          deviceName = iosInfo.utsname.machine ?? 'Unknown';
-        });
-      }
-      print("Device name: $deviceName");
-    } catch (e) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      print("Android info retrieved: ${androidInfo.model}");
+
+      String? id = await _androidIdPlugin.getId();
+      print("Android ID retrieved: $id");
+
+      setState(() {
+        deviceName = androidInfo.model ?? 'Unknown';
+        androidId = id ?? 'Unknown';
+      });
+
+      print("Final device name: $deviceName");
+      print("Final Android ID: $androidId");
+    } catch (e, stackTrace) {
       print("Failed to get device info: $e");
+      print("Stack trace: $stackTrace");
+      setState(() {
+        deviceName = 'Error: ${e.toString()}';
+        androidId = 'Error: ${e.toString()}';
+      });
     }
 
     try {
       final window = ui.window;
+      final pixelRatio = window.devicePixelRatio;
+      final physicalSize = window.physicalSize;
       setState(() {
-        devicePixelRatio = window.devicePixelRatio;
-        screenWidth = window.physicalSize.width;
-        screenHeight = window.physicalSize.height;
+        devicePixelRatio = pixelRatio;
+        screenWidth = physicalSize.width;
+        screenHeight = physicalSize.height;
       });
       print("Screen width: $screenWidth");
       print("Screen height: $screenHeight");
@@ -57,6 +69,7 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final platform = Theme.of(context).platform;
     return Scaffold(
       appBar: AppBar(
         title: Text('Device Info'),
@@ -67,6 +80,8 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Device Name: $deviceName'),
+            SizedBox(height: 16),
+            Text('AndroidID: $androidId'),
             SizedBox(height: 16),
             Text('Screen Width: ${screenWidth.toStringAsFixed(2)} px'),
             SizedBox(height: 16),

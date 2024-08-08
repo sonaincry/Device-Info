@@ -1,3 +1,4 @@
+import 'package:android_id/android_id.dart';
 import 'package:device_info_application/models/store_device.dart';
 import 'package:device_info_application/repository/store_device_repository.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +24,10 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
   late TextEditingController _nameController;
   late TextEditingController _widthController;
   late TextEditingController _heightController;
+  late TextEditingController _deviceCodeController;
 
   String deviceName = 'Unknown';
+  String deviceCode = 'Unknown';
   double screenWidth = 0;
   double screenHeight = 0;
 
@@ -33,6 +36,8 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
     super.initState();
     _nameController =
         TextEditingController(text: widget.storeDevice?.storeDeviceName ?? '');
+    _deviceCodeController =
+        TextEditingController(text: widget.storeDevice?.deviceCode ?? '');
     _widthController = TextEditingController(
         text: widget.storeDevice?.deviceWidth?.toString() ?? '');
     _heightController = TextEditingController(
@@ -48,24 +53,34 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
     _nameController.dispose();
     _widthController.dispose();
     _heightController.dispose();
+    _deviceCodeController.dispose();
     super.dispose();
   }
 
   Future<void> getDeviceInfo() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    final AndroidId _androidIdPlugin = AndroidId();
 
     try {
       if (Theme.of(context).platform == TargetPlatform.android) {
         AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        String? id = await _androidIdPlugin.getId();
+
         setState(() {
           deviceName = androidInfo.model ?? 'Unknown';
+          deviceCode = id ?? 'Unknown';
         });
+
+        // Update the controller text after fetching the ID
+        _deviceCodeController.text =
+            deviceCode; // Set deviceCode to the controller
       } else if (Theme.of(context).platform == TargetPlatform.iOS) {
         IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
         setState(() {
           deviceName = iosInfo.utsname.machine ?? 'Unknown';
         });
       }
+
       _nameController.text = deviceName; // Set device name to controller
     } catch (e) {
       print("Failed to get device info: $e");
@@ -86,11 +101,11 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
 
   void _saveStoreDevice() async {
     if (_formKey.currentState!.validate()) {
-      // Check for duplicate device
       final existingDevices =
           await _storeDeviceRepository.getAll(widget.storeId);
       final deviceExists = existingDevices.any((device) =>
           device.storeDeviceName == _nameController.text &&
+          device.deviceCode == _deviceCodeController.text &&
           device.deviceWidth == double.tryParse(_widthController.text) &&
           device.deviceHeight == double.tryParse(_heightController.text));
 
@@ -104,6 +119,7 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
       final storeDeviceData = {
         'storeId': widget.storeDevice?.storeId ?? widget.storeId,
         'storeDeviceName': _nameController.text,
+        'deviceCode': _deviceCodeController.text,
         'deviceWidth': double.tryParse(_widthController.text),
         'deviceHeight': double.tryParse(_heightController.text),
         'isDeleted': false,
@@ -148,6 +164,16 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter device name';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _deviceCodeController,
+                decoration: const InputDecoration(labelText: 'Device Code'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter device code';
                   }
                   return null;
                 },
