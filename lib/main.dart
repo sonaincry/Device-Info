@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:device_info_application/presentation/screens/device_info.dart';
+import 'package:device_info_application/presentation/screens/partners/dashboard.dart';
+import 'package:device_info_application/presentation/screens/partners/home_screen.dart';
 import 'package:device_info_application/presentation/screens/shared/login_screen.dart';
 import 'package:device_info_application/presentation/screens/store_code_input.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
       designSize: Size(360, 690),
       builder: (context, child) => MaterialApp(
-        home: StoreCodeInputScreen(),
+        home: DashboardScreen(),
       ),
     );
   }

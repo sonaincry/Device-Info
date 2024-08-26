@@ -71,9 +71,7 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
           deviceCode = id ?? 'Unknown';
         });
 
-        // Update the controller text after fetching the ID
-        _deviceCodeController.text =
-            deviceCode; // Set deviceCode to the controller
+        _deviceCodeController.text = deviceCode;
       } else if (Theme.of(context).platform == TargetPlatform.iOS) {
         IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
         setState(() {
@@ -81,7 +79,7 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
         });
       }
 
-      _nameController.text = deviceName; // Set device name to controller
+      _nameController.text = deviceName;
     } catch (e) {
       print("Failed to get device info: $e");
     }
@@ -99,8 +97,26 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
     }
   }
 
+  Future<bool> _validateDevice() async {
+    String name = _nameController.text;
+    bool exists = await _storeDeviceRepository.deviceExists(
+      widget.storeId,
+      name,
+    );
+
+    if (exists) {
+      _showSnackBar('Device already exists', Colors.red);
+      return false;
+    }
+
+    return true;
+  }
+
   void _saveStoreDevice() async {
     if (_formKey.currentState!.validate()) {
+      if (widget.storeDevice == null && !(await _validateDevice())) {
+        return;
+      }
       final existingDevices =
           await _storeDeviceRepository.getAll(widget.storeId);
       final deviceExists = existingDevices.any((device) =>
@@ -142,6 +158,32 @@ class _StoreDeviceFormScreenState extends State<StoreDeviceFormScreen> {
         );
       }
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+          label: 'Dismiss',
+          textColor: Colors.white,
+          onPressed: () {},
+        ),
+      ),
+    );
   }
 
   @override

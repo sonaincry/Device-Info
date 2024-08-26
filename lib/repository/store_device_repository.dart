@@ -67,4 +67,24 @@ class StoreDeviceRepository {
       throw Exception('Error deleting store device: $e');
     }
   }
+
+  Future<bool> deviceExists(int storeId, String name) async {
+    try {
+      final response = await service.get(url, queryParameters: {
+        'pageNumber': 1,
+        'pageSize': 10,
+        'storeId': storeId,
+        'searchString': name,
+      });
+      if (response.statusCode == 200) {
+        final List<dynamic> storeDevices = response.data;
+        return storeDevices.isNotEmpty;
+      } else {
+        throw Exception(
+            'Failed to load data. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      throw Exception('Error fetching data: $error');
+    }
+  }
 }
