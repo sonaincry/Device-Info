@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(
       designSize: Size(360, 690),
       builder: (context, child) => MaterialApp(
-        home: DashboardScreen(),
+        home: DashboardScreen(deviceId: 0),
       ),
     );
   }

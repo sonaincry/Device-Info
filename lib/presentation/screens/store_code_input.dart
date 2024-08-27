@@ -59,19 +59,16 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
             if (storeId != null) {
               await _storage.write(key: 'storeId', value: storeId.toString());
 
-              // Fetch device info
               final deviceInfo = await getDeviceInfo();
 
-              // Fetch existing devices
               final existingDevices = await fetchExistingDevices(storeId);
 
-              // Check if device already exists
               bool deviceExists = existingDevices.any((device) =>
                   device.storeDeviceName == deviceInfo['deviceName'] &&
                   device.deviceCode == deviceInfo['deviceCode']);
 
               if (deviceExists) {
-                _showErrorMessage('Device already exists in this store');
+                _showErrorMessage('Device already connect with the store!');
               } else {
                 await addNewDevice(storeId, deviceInfo);
               }
@@ -115,7 +112,7 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
 
       if (response.statusCode == 201) {
         _showSuccessMessage('Device added successfully');
-        Navigator.pop(context); // Return to Dashboard
+        Navigator.pop(context);
       } else {
         _showErrorMessage('Failed to add device: ${response.statusCode}');
       }

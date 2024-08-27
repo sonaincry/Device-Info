@@ -29,21 +29,14 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
 
     try {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      print("Android info retrieved: ${androidInfo.model}");
 
       String? id = await _androidIdPlugin.getId();
-      print("Android ID retrieved: $id");
 
       setState(() {
         deviceName = androidInfo.model ?? 'Unknown';
         androidId = id ?? 'Unknown';
       });
-
-      print("Final device name: $deviceName");
-      print("Final Android ID: $androidId");
-    } catch (e, stackTrace) {
-      print("Failed to get device info: $e");
-      print("Stack trace: $stackTrace");
+    } catch (e) {
       setState(() {
         deviceName = 'Error: ${e.toString()}';
         androidId = 'Error: ${e.toString()}';
@@ -59,9 +52,6 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
         screenWidth = physicalSize.width;
         screenHeight = physicalSize.height;
       });
-      print("Screen width: $screenWidth");
-      print("Screen height: $screenHeight");
-      print("Device pixel ratio: $devicePixelRatio");
     } catch (e) {
       print("Failed to get screen size: $e");
     }
@@ -69,23 +59,88 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final platform = Theme.of(context).platform;
     return Scaffold(
       appBar: AppBar(
         title: Text('Device Info'),
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Device Name: $deviceName'),
-            SizedBox(height: 16),
-            Text('AndroidID: $androidId'),
-            SizedBox(height: 16),
-            Text('Screen Width: ${screenWidth.toStringAsFixed(2)} px'),
-            SizedBox(height: 16),
-            Text('Screen Height: ${screenHeight.toStringAsFixed(2)} px'),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // Card for device name
+              _buildInfoCard(
+                icon: Icons.phone_android,
+                label: 'Device Name',
+                value: deviceName,
+              ),
+              SizedBox(height: 16),
+              // Card for Android ID
+              _buildInfoCard(
+                icon: Icons.fingerprint,
+                label: 'Android ID',
+                value: androidId,
+              ),
+              SizedBox(height: 16),
+              // Card for Screen Width
+              _buildInfoCard(
+                icon: Icons.straighten,
+                label: 'Screen Width',
+                value: '${screenWidth.toStringAsFixed(2)} px',
+              ),
+              SizedBox(height: 16),
+              // Card for Screen Height
+              _buildInfoCard(
+                icon: Icons.straighten,
+                label: 'Screen Height',
+                value: '${screenHeight.toStringAsFixed(2)} px',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      elevation: 5,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(icon, size: 36, color: Colors.teal),
+            SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
