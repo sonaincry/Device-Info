@@ -1,22 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:device_info_application/repository/display_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
-Future<List<Image>> fetchDeviceDisplay(int deviceId) async {
-  final url =
-      'https://ec2-3-1-81-96.ap-southeast-1.compute.amazonaws.com/api/Displays/V1/$deviceId/image';
-  print('Fetching images from URL: $url');
-  final response = await http.get(Uri.parse(url));
-  print('Response status: ${response.statusCode}');
-  print('Response body: ${response.body}');
-
-  if (response.statusCode == 200) {
-    return [Image.memory(response.bodyBytes)];
-  } else {
-    throw Exception('Failed to load images');
-  }
-}
+import 'package:flutter/services.dart';
 
 class DisplayDevice extends StatefulWidget {
   final int deviceId;
@@ -28,22 +14,41 @@ class DisplayDevice extends StatefulWidget {
 }
 
 class _DisplayDeviceState extends State<DisplayDevice> {
-  late Future<List<Image>> _futureImages;
+  final DisplayRepository displayRepository = DisplayRepository();
+  List<Image> _currentImages = [];
+  List<Image> _newImages = [];
   late Timer _timer;
-  bool _showImages = true;
-  bool _isHovering = false;
+  bool _isInitialLoad = true;
 
   @override
   void initState() {
     super.initState();
     _fetchImages();
     _startTimer();
+    _setLandscapeOrientation();
+    _setFullScreen();
   }
 
-  void _fetchImages() {
-    setState(() {
-      _futureImages = fetchDeviceDisplay(widget.deviceId);
-    });
+  Future<void> _fetchImages() async {
+    try {
+      final fetchedImages =
+          await displayRepository.getDeviceImage(widget.deviceId);
+      setState(() {
+        if (_isInitialLoad) {
+          _currentImages = fetchedImages;
+          _isInitialLoad = false;
+        } else {
+          _newImages = fetchedImages;
+          // Only update _currentImages if new images are successfully fetched
+          if (_newImages.isNotEmpty) {
+            _currentImages = _newImages;
+          }
+        }
+      });
+    } catch (e) {
+      print('Error fetching images: $e');
+      // In case of error, we keep the current images
+    }
   }
 
   void _startTimer() {
@@ -52,67 +57,54 @@ class _DisplayDeviceState extends State<DisplayDevice> {
     });
   }
 
+  void _setLandscapeOrientation() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  void _setFullScreen() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  }
+
   @override
   void dispose() {
     _timer.cancel();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
-  }
-
-  void _toggleImageVisibility() {
-    setState(() {
-      _showImages = !_showImages;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          MouseRegion(
-            onEnter: (_) {
-              setState(() {
-                _isHovering = true;
-              });
-            },
-            onExit: (_) {
-              setState(() {
-                _isHovering = false;
-              });
-            },
-            child: AnimatedOpacity(
-              opacity: _isHovering ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: IconButton(
-                icon:
-                    Icon(_showImages ? Icons.visibility : Icons.visibility_off),
-                onPressed: _toggleImageVisibility,
-              ),
-            ),
+    return WillPopScope(
+      onWillPop: () async {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        return true;
+      },
+      child: Scaffold(
+        body: GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Container(
+            color: Colors.black,
+            child: _isInitialLoad
+                ? const Center(child: CircularProgressIndicator())
+                : _currentImages.isEmpty
+                    ? const Center(child: Text('No images found'))
+                    : PageView.builder(
+                        itemCount: _currentImages.length,
+                        itemBuilder: (context, index) {
+                          return FittedBox(
+                            fit: BoxFit.contain,
+                            child: _currentImages[index],
+                          );
+                        },
+                      ),
           ),
-        ],
-      ),
-      body: FutureBuilder<List<Image>>(
-        future: _futureImages,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No images found'));
-          } else {
-            final images = snapshot.data!;
-            return _showImages
-                ? ListView.builder(
-                    itemCount: images.length,
-                    itemBuilder: (context, index) {
-                      return images[index];
-                    },
-                  )
-                : const Center(child: Text(''));
-          }
-        },
+        ),
       ),
     );
   }

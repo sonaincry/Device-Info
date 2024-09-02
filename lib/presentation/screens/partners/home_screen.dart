@@ -57,7 +57,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              // Section 4: Manage Buttons
             ],
           ),
         ),
@@ -65,7 +64,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Helper functions to build UI elements
   Widget _buildMetricCard(String title, String value, Color color) {
     return SizedBox(
       width: 170,
@@ -80,7 +78,7 @@ class HomeScreen extends StatelessWidget {
               colors: [
                 color.withOpacity(0.8),
                 color.withOpacity(0.4),
-              ], // Gradient example
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
