@@ -171,31 +171,101 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Enter Store Code')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextFormField(
-                controller: storeCodeController,
-                decoration: InputDecoration(labelText: 'Store Code'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a store code';
-                  }
-                  return null;
-                },
+      appBar: AppBar(
+        title: Text('Connect to Store'),
+        backgroundColor: Colors.blue[800],
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue[800]!, Colors.blue[400]!],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Card(
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.store,
+                            size: 80,
+                            color: Colors.blue[800],
+                          ),
+                          SizedBox(height: 24),
+                          Text(
+                            'Enter Store Code',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[800],
+                            ),
+                          ),
+                          SizedBox(height: 24),
+                          TextFormField(
+                            controller: storeCodeController,
+                            decoration: InputDecoration(
+                              labelText: 'Store Code',
+                              prefixIcon: Icon(Icons.qr_code),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                    color: Colors.blue[800]!, width: 2),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a store code';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed:
+                                _isLoading ? null : fetchStoreIdAndAddDevice,
+                            child: _isLoading
+                                ? SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white),
+                                  )
+                                : Text('Connect'),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue[800],
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 32, vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _isLoading ? null : fetchStoreIdAndAddDevice,
-                child:
-                    _isLoading ? CircularProgressIndicator() : Text('Submit'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
