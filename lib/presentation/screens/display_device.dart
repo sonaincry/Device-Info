@@ -39,7 +39,7 @@ class _DisplayDeviceState extends State<DisplayDevice> {
           _isInitialLoad = false;
         } else {
           _newImages = fetchedImages;
-          // Only update _currentImages if new images are successfully fetched
+          // update current image if new image fetch ok
           if (_newImages.isNotEmpty) {
             _currentImages = _newImages;
           }
@@ -47,7 +47,7 @@ class _DisplayDeviceState extends State<DisplayDevice> {
       });
     } catch (e) {
       print('Error fetching images: $e');
-      // In case of error, we keep the current images
+      // If error keep the current image
     }
   }
 
@@ -84,26 +84,21 @@ class _DisplayDeviceState extends State<DisplayDevice> {
         return true;
       },
       child: Scaffold(
-        body: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: Container(
-            color: Colors.black,
-            child: _isInitialLoad
-                ? const Center(child: CircularProgressIndicator())
-                : _currentImages.isEmpty
-                    ? const Center(child: Text('No images found'))
-                    : PageView.builder(
-                        itemCount: _currentImages.length,
-                        itemBuilder: (context, index) {
-                          return FittedBox(
-                            fit: BoxFit.contain,
-                            child: _currentImages[index],
-                          );
-                        },
-                      ),
-          ),
+        body: Container(
+          color: Colors.black,
+          child: _isInitialLoad
+              ? const Center(child: CircularProgressIndicator())
+              : _currentImages.isEmpty
+                  ? const Center(child: Text('No images found'))
+                  : PageView.builder(
+                      itemCount: _currentImages.length,
+                      itemBuilder: (context, index) {
+                        return FittedBox(
+                          fit: BoxFit.contain,
+                          child: _currentImages[index],
+                        );
+                      },
+                    ),
         ),
       ),
     );

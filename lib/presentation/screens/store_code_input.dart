@@ -68,7 +68,7 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
                   device.deviceCode == deviceInfo['deviceCode']);
 
               if (deviceExists) {
-                _showErrorMessage('Device already connect with the store!');
+                _showSuccessMessage('Device already connect with the store!');
               } else {
                 await addNewDevice(storeId, deviceInfo);
               }
@@ -171,9 +171,9 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFF392850),
       appBar: AppBar(
-        title: Text('Connect to Store'),
-        backgroundColor: Colors.blue[800],
+        backgroundColor: Color(0xFF392850),
         elevation: 0,
       ),
       body: Container(
@@ -181,7 +181,7 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blue[800]!, Colors.blue[400]!],
+            colors: [Color.fromARGB(255, 71, 40, 119)!, Color(0xFF392850)!],
           ),
         ),
         child: SafeArea(
@@ -204,7 +204,7 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
                           Icon(
                             Icons.store,
                             size: 80,
-                            color: Colors.blue[800],
+                            color: Color(0xFF392850),
                           ),
                           SizedBox(height: 24),
                           Text(
@@ -212,7 +212,7 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue[800],
+                              color: Color(0xFF392850),
                             ),
                           ),
                           SizedBox(height: 24),
@@ -251,7 +251,7 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
                                 : Text('Connect'),
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,
-                              backgroundColor: Colors.blue[800],
+                              backgroundColor: Color(0xFF392850),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 32, vertical: 16),
                               shape: RoundedRectangleBorder(
