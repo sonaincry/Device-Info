@@ -1,96 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:device_info_application/presentation/screens/shared/device_info_service.dart';
 import 'package:device_info_application/presentation/screens/device_info.dart';
 import 'package:device_info_application/presentation/screens/store_code_input.dart';
 import 'package:device_info_application/presentation/screens/display_device.dart';
 
 class DashboardScreen extends StatelessWidget {
+  final DeviceInfoService deviceInfoService = DeviceInfoService();
+
   DashboardScreen({Key? key}) : super(key: key);
 
-  final List<DashboardItem> items = [
-    DashboardItem(
-      title: 'Connect To Store',
-      subtitle: 'Add new device',
-      icon: Icons.store,
-      color: Colors.blue,
-      onTap: (context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => StoreCodeInputScreen()),
-      ),
-    ),
-    DashboardItem(
-      title: 'Device Info',
-      subtitle: 'View device details',
-      icon: Icons.info_outline,
-      color: Colors.orange,
-      onTap: (context) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => DeviceInfoScreen()),
-      ),
-    ),
-    DashboardItem(
-      title: 'Display Device',
-      subtitle: 'Show connected device',
-      icon: Icons.devices,
-      color: Colors.green,
-      onTap: (context) => Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                DisplayDevice(deviceId: 1)), // Assuming a default deviceId of 1
-      ),
-    ),
-    DashboardItem(
-      title: 'Settings',
-      subtitle: 'App preferences',
-      icon: Icons.settings,
-      color: Colors.red,
-      onTap: (context) {}, // Placeholder for settings navigation
-    ),
-  ];
+  void _deviceInfo(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => DeviceInfoScreen()),
+    );
+  }
+
+  void _addNewDevice(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => StoreCodeInputScreen()),
+    );
+  }
+
+  void _displayScreen(BuildContext context, int deviceId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => DisplayDevice(deviceId: deviceId)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: deviceInfoService.getDeviceInfo(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingScreen();
+        } else if (snapshot.hasError) {
+          return _buildErrorScreen(snapshot.error.toString());
+        } else if (snapshot.hasData) {
+          final deviceId = snapshot.data!['deviceId'] as int;
+          return _buildDashboard(context, deviceId);
+        } else {
+          return _buildNoDataScreen();
+        }
+      },
+    );
+  }
+
+  Widget _buildLoadingScreen() {
     return Scaffold(
-      backgroundColor: Color(0xFF392850),
-      body: SafeArea(
+      body: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen(String error) {
+    return Scaffold(
+      body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Home",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.notifications, color: Colors.white),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
+            Icon(Icons.error_outline, size: 60, color: Colors.red),
+            SizedBox(height: 16),
+            Text(
+              'Oops! Something went wrong',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 40),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                padding: EdgeInsets.all(16),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                children: items
-                    .map((item) => _buildDashboardItem(context, item))
-                    .toList(),
-              ),
+            SizedBox(height: 8),
+            Text(
+              error,
+              style: TextStyle(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -98,44 +84,132 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardItem(BuildContext context, DashboardItem item) {
+  Widget _buildNoDataScreen() {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          'No data available',
+          style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDashboard(BuildContext context, int deviceId) {
+    return Scaffold(
+        body: Container(
+      color: Color(0xFF392850),
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200.0,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.only(left: 16, bottom: 16),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.home,
+                    size: 24.0,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Home',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 22.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF392850), Color(0xFF392850)],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.all(20),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.0,
+                crossAxisSpacing: 16.0,
+                mainAxisSpacing: 16.0,
+              ),
+              delegate: SliverChildListDelegate(
+                [
+                  _buildDashboardCard(
+                    icon: Icons.add_circle_outline,
+                    title: 'Connect To Store',
+                    onTap: () => _addNewDevice(context),
+                    color: Colors.blue,
+                  ),
+                  _buildDashboardCard(
+                    icon: Icons.info_outline,
+                    title: 'Device Info',
+                    onTap: () => _deviceInfo(context),
+                    color: Colors.orange,
+                  ),
+                  _buildDashboardCard(
+                    icon: Icons.devices,
+                    title: 'Display Device',
+                    onTap: () => _displayScreen(context, deviceId),
+                    color: Colors.green,
+                  ),
+                  _buildDashboardCard(
+                      icon: Icons.settings,
+                      title: 'Settings',
+                      onTap: () => null,
+                      color: Colors.brown),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ));
+  }
+
+  Widget _buildDashboardCard({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () => item.onTap(context),
+        onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                item.color.withOpacity(0.8),
-                item.color.withOpacity(0.6)
-              ],
+              colors: [color.withOpacity(0.8), color.withOpacity(0.6)],
             ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(item.icon, size: 50, color: Colors.white),
+              Icon(icon, size: 50, color: Colors.white),
               SizedBox(height: 12),
               Text(
-                item.title,
+                title,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 4),
-              Text(
-                item.subtitle,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -145,20 +219,4 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class DashboardItem {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final Function(BuildContext) onTap;
-
-  DashboardItem({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
 }

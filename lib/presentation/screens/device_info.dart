@@ -70,7 +70,7 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 80), // Add some space at the top
+              SizedBox(height: 80),
               Text(
                 'Device Information',
                 style: TextStyle(
