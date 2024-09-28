@@ -111,7 +111,7 @@ class _StoreCodeInputScreenState extends State<StoreCodeInputScreen> {
       );
 
       if (response.statusCode == 201) {
-        _showSuccessMessage('Device added successfully');
+        _showSuccessMessage('Send request connect to the store successfully');
         Navigator.pop(context);
       } else {
         _showErrorMessage('Failed to add device: ${response.statusCode}');
